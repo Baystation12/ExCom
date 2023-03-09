@@ -11,7 +11,7 @@
     "node": ">=16"
   },
   "dependencies": {
-    "eris": "0.17.1"
+    "eris": "0.17.2"
   },
   "contributors": [
     "spookerton <spkrtn@pm.me> (https://github.com/spookerton)"
