@@ -1,8 +1,17 @@
-import { createConnection } from 'node:net'
+import { isUtf8 } from 'node:buffer'
+import { Socket } from 'node:net'
 
-const buildInboundMessage = text => {
-  const textBytes = Buffer.from(text)
-  const byteLength = textBytes.length + 6 // length after lengths; message + 5 nulls
+
+function toHex (number) {
+  return number.toString(16)
+}
+
+
+export function String2Daemon (string) {
+  if (typeof string !== 'string' || !string.length)
+    throw new Error('Bad payload. Must be non-empty string.')
+  const stringBytes = Buffer.from(string)
+  const byteLength = stringBytes.length + 6 // length after lengths; message + 5 nulls
   return Buffer.concat([
     Buffer.from([
       0x00, 0x83, // byond magic header
@@ -10,61 +19,96 @@ const buildInboundMessage = text => {
       byteLength & 0xFF, // lower length
       0x00, 0x00, 0x00, 0x00, 0x00 // 5-null padding
     ]),
-    textBytes, // The message itself
+    stringBytes, // The message itself
     Buffer.from([0x00]) // end-of-message null
   ], byteLength + 4) // True buffer length; byteLength + magic header & length bytes
 }
 
-const consumeOutboundMessage = (buffer, loud) => {
-  if (buffer[0] !== 0x00 || buffer[1] !== 0x83) { // byond magic header
-    if (loud) {
-      throw new Error('Invalid magic bits')
-    }
-    else {
-      return undefined
-    }
-  }
-  // ... bits 2 and 3 are lengths we don't care for
-  if (buffer[4] === 0x00) { // if world/Topic returns nothing OR returns null, we get this
+
+export function Daemon2Payload (buffer) {
+  const [ magic1, magic2, sizeHigh, sizeLow, type, ] = buffer
+  if (magic1 !== 0x00 || magic2 !== 0x83)
+    throw new Error(`Invalid magic byte(s) [${toHex(magic1)},${toHex(magic2)}]`)
+  if (type === 0x00)
     return null
+  const payload = buffer.subarray(5, -1)
+  if (type === 0x2a)
+    return payload.readFloatLE(0)
+  if (type === 0x06) {
+    if (!isUtf8(payload))
+      throw new Error('Invalid string payload.')
+    return payload.toString()
   }
-  if (buffer[4] === 0x06) { // if world/Topic returns a string, we get this
-    return buffer.subarray(5, -1).toString()
-  }
-  if (buffer[4] === 0x2a) { // if world/Topic returns a number, we get this
-    return 0 // TODO: parse numbers (or not, we should be moving to json responses anyway)
-    //3 = (00 83   00 05 2a   00 00 40 40)
-    //4 = (00 83   00 05 2a   00 00 80 40)
-    //5 = (00 83   00 05 2a   00 00 a0 40)
-    //1234 = (00 83   00 05 2a   00 40 9a 44)
-  }
-  if (loud) {
-    throw new Error('Invalid response type')
-  }
-  return undefined
+  throw new Error(`Invalid response type ${toHex(type)}`)
 }
 
-export async function topic (port, host, message) {
-  return await new Promise(function (resolve, reject) {
-    let socket = createConnection(port, host)
-      .on('error', function (error) {
-        socket.end()
-        reject(error)
-      })
-      .on('connect', function () {
-        let encoded = buildInboundMessage(message)
-        socket.write(encoded)
-      })
-      .on('data', function (data) {
-        try {
-          let decoded = consumeOutboundMessage(data)
-          socket.end()
-          resolve(decoded)
+
+export async function topic (port, host, query, timeout = 10e3) {
+  try {
+    if (typeof query !== 'string')
+      query = JSON.stringify(query)
+    const message = String2Daemon(query)
+    const response = await fetchTopic(port, host, message, timeout)
+    return Daemon2Payload(response)
+  }
+  catch (error) {
+    return error
+  }
+}
+
+
+function fetchTopic (port, host, message, timeout) {
+  let socket
+  let timeoutHandle
+  return new Promise(function (resolve, reject) {
+    timeoutHandle = setTimeout(function () {
+      const error = new Error(`Timed out (${timeout}ms)`)
+      reject(error)
+    }, timeout)
+
+    let expected
+    let response = []
+
+    socket = new Socket()
+    socket.unref()
+
+    socket.once('error', function (error) {
+      reject(error)
+    })
+
+    socket.once('ready', function () {
+      socket.write(message)
+    })
+
+    socket.on('data', function (data) {
+      response.push(...data)
+      if (expected == null) {
+        if (response.length < 4)
+          return
+        const [ magic1, magic2, sizeHigh, sizeLow ] = response
+        if (magic1 !== 0x00 || magic2 !== 0x83) {
+          const error = new Error(`Invalid magic byte(s) [${toHex(magic1)},${toHex(magic2)}]`)
+          return reject(error)
         }
-        catch (error) {
-          socket.end()
-          reject(error)
-        }
-      })
+        expected = 4 + (sizeHigh << 8) + sizeLow
+      }
+      if (response.length > expected) {
+        const error = new Error(`Invalid response length (${response.length} of ${expected})`)
+        return reject(error)
+      }
+      if (response.length === expected) {
+        const buffer = Buffer.from(response)
+        return resolve(buffer)
+      }
+    })
+
+    socket.connect(port, host)
+
+  }).finally(function () {
+    clearTimeout(timeoutHandle)
+    if (!socket)
+      return
+    socket.removeAllListeners()
+    socket.destroy()
   })
 }

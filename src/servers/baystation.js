@@ -1,4 +1,5 @@
 import { Server } from './Server.js'
+import { key } from '../../config.js'
 
 /// The last parsed ?status result from the server
 let statusResult
@@ -50,6 +51,51 @@ export const baystation = new class extends Server {
     return {
       name: this.getName(),
       players: statusResult.playerlist
+    }
+  }
+
+  ///Collect a list of characters and their jobs on the server
+  async manifest () {
+    await updateStatusResult()
+    if (statusResult instanceof Error) {
+      return null
+    }
+    manifest = await baystation.queryTopic('?manifest=1')
+      .catch(error => error)
+    if (manifest instanceof Error) {
+      return null
+    }
+    return {
+      name: this.getName(),
+      manifest: manifest
+      }
+    }
+
+  ///Sends a PM to a player on the server
+  async pm (admin_username, ckey, message) {
+    let result = await this.queryTopic(`?adminmsg=${ckey}&msg=${message}&sender=${admin_username}&key=${key}`)
+      .catch(error => error)
+    if (result instanceof Error) {
+      return null
+    }
+    return result
+  }
+
+  ///Get a players notes
+  async notes (ckey) {
+    let result = await this.queryTopic(`?notes=${ckey}&key=${key}`)
+      .catch(error => error)
+    if (result instanceof Error) {
+      return null
+    }
+    return result
+  }
+
+  ///Handle relayed ahelps from the server
+  async ahelp (msg, eris, channel) {
+    channel = eris.getChannel(channel);
+    if (channel) {
+      channel.createMessage(msg);
     }
   }
 
