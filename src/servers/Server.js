@@ -33,11 +33,11 @@ export class Server {
   /// Topic() to the server, expecting a url encoded string response
   async queryTopic (message) {
     try {
-      let response = await topic(this.#port, this.#host, message)
+      const response = await topic(this.#port, this.#host, message)
       console.log(response)
       return Object.fromEntries(
         response.split('&').map(function (chunk) {
-          let [key, ...value] = chunk.split('=')
+          const [key, ...value] = chunk.split('=')
             return [
               decodeURIComponent(key),
               decodeURIComponent(value.join('='))

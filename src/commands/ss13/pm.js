@@ -3,7 +3,7 @@ import {
   Server,
   serversByGuild,
   getErisOptionsWithHandler
-} from '../servers.js'
+} from '../../servers.js'
 
 
 export const type = Constants.ApplicationCommandTypes.CHAT_INPUT
@@ -26,7 +26,7 @@ export const options = [
 ]
 
 export async function handler (interaction) {
-  let server = serversByGuild[interaction.guildID]
+  const server = serversByGuild[interaction.guildID]
 
   if (!(server instanceof Server)) {
     interaction.createMessage('No such server.')
@@ -38,14 +38,14 @@ export async function handler (interaction) {
     return
   }
 
-  let acknowledged = interaction.acknowledge()
-  let result = await server.pm(interaction.member.username, interaction.data.options[0].value, interaction.data.options[1].value)
+  const acknowledged = interaction.acknowledge()
+  const result = await server.pm(interaction.member.username, interaction.data.options[0].value, interaction.data.options[1].value)
   await acknowledged
   if (!result) {
     interaction.createFollowup(`Failed to send a message to ${interaction.data.options[0].value}.`)
     return
   }
-  if (result['Message Successful'] ===  '')
+  if (result['Message Successful'] === '')
     interaction.createFollowup(`Sent: ${interaction.data.options[0].value} -> ${interaction.data.options[1].value}`)
   else
     interaction.createFollowup(`Server did not send a proper response. Response: ${JSON.stringify(result)}`)

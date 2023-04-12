@@ -3,7 +3,7 @@ import {
   Server,
   serversByGuild,
   getErisOptionsWithHandler
-} from '../servers.js'
+} from '../../servers.js'
 
 export const type = Constants.ApplicationCommandTypes.CHAT_INPUT
 
@@ -31,8 +31,8 @@ export async function handler (interaction) {
     interaction.createMessage(`${server.name} does not have a players handler.`)
     return
   }
-  let acknowledged = interaction.acknowledge()
-  let result = await server.players()
+  const acknowledged = interaction.acknowledge()
+  const result = await server.players()
   await acknowledged
   if (!result) {
     interaction.createFollowup('Failed fetching status.')
