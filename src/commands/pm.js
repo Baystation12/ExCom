@@ -46,7 +46,7 @@ export async function handler (interaction) {
     return
   }
   if (result['Message Successful'] ===  '')
-    interaction.createFollowup('Message sent.')
+    interaction.createFollowup(`Sent: ${interaction.data.options[0].value} -> ${interaction.data.options[1].value}`)
   else
     interaction.createFollowup(`Server did not send a proper response. Response: ${JSON.stringify(result)}`)
 }
