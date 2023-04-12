@@ -34,6 +34,7 @@ export class Server {
   async queryTopic (message) {
     try {
       let response = await topic(this.#port, this.#host, message)
+      console.log(response)
       return Object.fromEntries(
         response.split('&').map(function (chunk) {
           let [key, ...value] = chunk.split('=')

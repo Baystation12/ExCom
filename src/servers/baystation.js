@@ -14,7 +14,7 @@ async function updateStatusResult () {
     return
   }
   nextStatus = time + 10e3
-  statusResult = await baystation.queryTopic('?status=2')
+  statusResult = await baystation.queryTopic('status=2')
     .catch(error => error)
   if (statusResult instanceof Error) {
     return
@@ -31,6 +31,7 @@ export const baystation = new class extends Server {
   async status () {
     await updateStatusResult()
     if (statusResult instanceof Error) {
+      console.log(statusResult)
       return null
     }
     return {
@@ -60,7 +61,7 @@ export const baystation = new class extends Server {
     if (statusResult instanceof Error) {
       return null
     }
-    manifest = await baystation.queryTopic('?manifest=1')
+    manifest = await baystation.queryTopic('manifest=1')
       .catch(error => error)
     if (manifest instanceof Error) {
       return null
@@ -73,9 +74,10 @@ export const baystation = new class extends Server {
 
   ///Sends a PM to a player on the server
   async pm (admin_username, ckey, message) {
-    let result = await this.queryTopic(`?adminmsg=${ckey}&msg=${message}&sender=${admin_username}&key=${key}`)
+    let result = await this.queryTopic(`adminmsg=${ckey}&msg=${message}&sender=${admin_username}&key=${key}`)
       .catch(error => error)
     if (result instanceof Error) {
+      console.log(result)
       return null
     }
     return result
@@ -83,7 +85,7 @@ export const baystation = new class extends Server {
 
   ///Get a players notes
   async notes (ckey) {
-    let result = await this.queryTopic(`?notes=${ckey}&key=${key}`)
+    let result = await this.queryTopic(`notes=${ckey}&key=${key}`)
       .catch(error => error)
     if (result instanceof Error) {
       return null
