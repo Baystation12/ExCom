@@ -104,6 +104,6 @@ export const baystation = new class extends Server {
 }({
   name: 'Baystation',
   port: 8000,
-  host: 'baystation.xyz',
+  host: '10.10.10.80', //'baystation.xyz',
   guild: '104289531796131840'
 })

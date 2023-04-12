@@ -5,6 +5,6 @@ export const key = ''
 ///The IP address that the HTTP server will listen on, which is for listening for data from the server
 export const listen_host = ''
 ///The port that the HTTP server will listen on
-export const listen_port = ''
+export const listen_port = 0
 ///The discord guild snowflake
 export const guild_id = ''

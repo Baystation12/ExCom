@@ -1,6 +1,6 @@
-import { isUtf8 } from 'node:buffer'
+//import { isUtf8 } from 'node:buffer' // node >= 18
 import { Socket } from 'node:net'
-
+import isUtf8 from 'utf-8-validate' // node < 18
 
 function toHex (number) {
   return number.toString(16)
@@ -67,7 +67,7 @@ function fetchTopic (port, host, message, timeout) {
     }, timeout)
 
     let expected
-    let response = []
+    const response = []
 
     socket = new Socket()
     socket.unref()

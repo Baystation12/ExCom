@@ -105,3 +105,4 @@ dist
 
 # Manual adds
 /package-lock.json
+/config.js
