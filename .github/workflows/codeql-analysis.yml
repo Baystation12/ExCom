@@ -8,6 +8,7 @@ on:
       - main
   schedule:
     - cron: 22 2 * * 0
+  workflow_dispatch:
 jobs:
   analyze:
     name: Analyze
@@ -23,9 +24,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
       - name: Setup Node.js environment
-        uses: actions/setup-node@v3.4.1
+        uses: actions/setup-node@v3.6.0
         with:
-          node-version: 18.x
+          node-version: 16.x
           architecture: x64
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v2
