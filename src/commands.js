@@ -1,5 +1,6 @@
 export * as ping from './commands/other/ping.js'
 export * as summon from './commands/other/summon.js'
+export * as weather from './commands/other/weather.js'
 
 
 //export * as ban from './commands/ss13/ban.js'
