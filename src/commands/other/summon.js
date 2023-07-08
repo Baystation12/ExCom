@@ -1,5 +1,4 @@
 import { Constants } from 'eris'
-import fetch from 'node-fetch' // deprecated node >= 18
 
 const types = {
   'axolotl' () {
