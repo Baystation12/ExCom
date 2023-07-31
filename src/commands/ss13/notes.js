@@ -19,7 +19,7 @@ export const options = [
 ]
 
 export async function handler (interaction) {
-  let server = serversByGuild[interaction.guildID]
+  const server = serversByGuild[interaction.guildID]
 
   if (!(server instanceof Server)) {
     interaction.createMessage('No such server.')
@@ -31,8 +31,8 @@ export async function handler (interaction) {
     return
   }
 
-  let acknowledged = interaction.acknowledge()
-  let result = await server.notes(interaction.data.options[0].value)
+  const acknowledged = interaction.acknowledge()
+  const result = await server.notes(interaction.data.options[0].value)
 
   await acknowledged
   if (!result) {
