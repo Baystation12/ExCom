@@ -14,7 +14,7 @@
     "eris": "0.17.2",
     "express": "4.19.2",
     "body-parser": "1.20.2",
-    "utf-8-validate": "6.0.3"
+    "utf-8-validate": "6.0.4"
   },
   "contributors": [
     "spookerton <spkrtn@pm.me> (https://github.com/spookerton)"
