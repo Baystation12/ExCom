@@ -8,7 +8,7 @@
   "type": "module",
   "main": "src/index.js",
   "engines": {
-    "node": ">=18"
+    "node": ">=22"
   },
   "dependencies": {
     "eris": "0.18.0",
@@ -17,6 +17,7 @@
     "utf-8-validate": "6.0.4"
   },
   "contributors": [
-    "spookerton <spkrtn@pm.me> (https://github.com/spookerton)"
+    "spookerton <spkrtn@pm.me> (https://github.com/spookerton)",
+    "Mucker (https://github.com/MuckerMayhem)"
   ]
 }
