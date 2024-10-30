@@ -1,6 +1,8 @@
 {
   "recommendations": [
-    "rome.rome",
-    "eamodio.gitlens"
+    "stylemistake.auto-comment-blocks",
+    "biomejs.biome",
+    "eamodio.gitlens",
+    "oderwat.indent-rainbow"
   ]
 }
